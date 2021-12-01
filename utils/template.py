@@ -7,7 +7,7 @@ def read_sample():
     """récupère les entrées depuis le fichier texte correspondant"""
     with open('inputs/dayDAY.txt', 'r') as f:
         sample = f.read().split('\n')
-    sample = [int(i) for i in sample if i != '']
+    sample = [ i for i in sample if i != '' ]
     return sample
 
 def part1(sample):
