@@ -11,7 +11,7 @@ def read_sample():
     return sample
 
 def slope(mv_x, mv_y, sample):
-    """Partie 1 du défi"""
+    """Compte le nombre d'arbres que se prend le marcheur"""
     pos = (0,0)
     n1 = len(sample)
     n2 = len(sample[0])
