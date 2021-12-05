@@ -1,5 +1,5 @@
-[[ $1 ]] | set -- $(date +%d)
-[[ $2 ]] | set -- $(date +%Y)
+[[ $1 ]] || set -- $(date +%d)
+[[ $2 ]] || set -- $1 $(date +%Y)
 
 if [[ ! -e .git ]]; then
 	echo "Merci de se déplacer dans le répertoire approprié"
