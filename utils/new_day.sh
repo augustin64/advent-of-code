@@ -10,6 +10,9 @@ DAY="$1"
 YEAR="$2"
 FILENAME="${YEAR}/day${DAY}.py"
 
+python utils/cli.py download -y $YEAR -d $DAY
+python utils/cli.py show -y $YEAR -d $DAY
+
 cp utils/template.py "$FILENAME"
 sed -i "s/DAY/${DAY}/" "$FILENAME"
 sed -i "s/YEAR/${YEAR}/" "$FILENAME"

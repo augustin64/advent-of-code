@@ -24,3 +24,6 @@ def main():
     sample = read_sample()
     print(f"part1: {part1(sample)}")
     print(f"part2: {part2(sample)}")
+
+if __name__ == "__main__":
+    main()
