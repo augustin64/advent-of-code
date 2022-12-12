@@ -1,24 +1,39 @@
 #!/usr/bin/python3
+"""
+Interface en ligne de commande pour interagir avec https://adventofcode.com/
+Prérequis: fichier ~/.aoc-cookie contenant le cookie de connexion au site
+Suggéré: alias aoc="$CHEMIN_VERS_CE_REPO/utils/cli.py"
+"""
+from optparse import OptionParser
+from pathlib import Path
+import datetime
+import os
+
 import requests
 from bs4 import BeautifulSoup
-from optparse import OptionParser
-import datetime
 
-with open("utils/cookie.txt", "r") as f:
-    cookie = f.read()
+
+
+home = str(Path.home())
+with open(os.path.join(home, ".aoc-cookie"), "r", encoding='utf8') as file:
+    cookie = file.read()
 
 session = requests.Session()
 session.cookies["session"] = cookie
 
+
 def download_input(year, day):
-    r = session.get(f"https://adventofcode.com/{year}/day/{int(day)}/input")
-    with open(f"{year}/inputs/day{str(day).zfill(2)}.txt", "w") as f:
-        f.write(r.content.decode())
+    """Télécharge la donnée d'entrée correspondant à un certain jour"""
+    request = session.get(f"https://adventofcode.com/{year}/day/{int(day)}/input")
+    with open(f"{year}/inputs/day{str(day).zfill(2)}.txt", "w", encoding='utf8') as file:
+        file.write(request.content.decode())
     print("ok")
 
+
 def show_puzzle(year, day, part=None):
-    r = session.get(f"https://adventofcode.com/{year}/day/{int(day)}")
-    soup = BeautifulSoup(r.content, "html.parser")
+    """Affiche l'énoncé du jour demandé"""
+    request = session.get(f"https://adventofcode.com/{year}/day/{int(day)}")
+    soup = BeautifulSoup(request.content, "html.parser")
     day_desc = soup.find_all("article", {"class": "day-desc"})
     if part is None:
         for i in range(len(day_desc)):
@@ -27,27 +42,33 @@ def show_puzzle(year, day, part=None):
     if part > len(day_desc) or part <= 0:
         print(f"Partie {part} non disponible")
         return
-    print(day_desc[part-1].text)
+    print(day_desc[part - 1].text)
+
 
 def submit(year, day, answer, level=1):
-    r = session.post(f"https://adventofcode.com/{year}/day/{int(day)}/answer", data={"answer": answer, "level": level})
+    """Soumet une réponse à validation"""
+    request = session.post(
+        f"https://adventofcode.com/{year}/day/{int(day)}/answer",
+        data={"answer": answer, "level": level},
+    )
     known_msgs = [
         "That's the right answer!",
         "That's not the right answer",
         "You gave an answer too recently",
-        "You don't seem to be solving the right level.  Did you already complete it?"
+        "You don't seem to be solving the right level.  Did you already complete it?",
     ]
     for msg in known_msgs:
-        if msg in r.text:
+        if msg in request.text:
             print(msg)
             return
-    with open(f"answer-test-{year}-{int(day)}-{level}", "w") as f:
-        f.write(r.content.decode())
-        
+    with open(f"answer-test-{year}-{int(day)}-{level}", "w", encoding='utf8') as file:
+        file.write(request.content.decode())
+
     print("ok ?")
 
 
 def __main__(options, args):
+    """Fonction principale"""
     if len(args) == 0:
         print("Une action doit être spécifiée")
         return
@@ -69,7 +90,6 @@ def __main__(options, args):
         submit(options.year, options.day, answer, options.level)
     else:
         print(f"Invalid action {args[0]}")
-        result = 0
 
 
 today = datetime.datetime.now()
@@ -104,6 +124,6 @@ parser.add_option(
 )
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     (OPTIONS, args) = parser.parse_args()
     __main__(OPTIONS, args)
