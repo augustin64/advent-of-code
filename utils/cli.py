@@ -51,20 +51,8 @@ def submit(year, day, answer, level=1):
         f"https://adventofcode.com/{year}/day/{int(day)}/answer",
         data={"answer": answer, "level": level},
     )
-    known_msgs = [
-        "That's the right answer!",
-        "That's not the right answer",
-        "You gave an answer too recently",
-        "You don't seem to be solving the right level.  Did you already complete it?",
-    ]
-    for msg in known_msgs:
-        if msg in request.text:
-            print(msg)
-            return
-    with open(f"answer-test-{year}-{int(day)}-{level}", "w", encoding='utf8') as file:
-        file.write(request.content.decode())
-
-    print("ok ?")
+    soup = BeautifulSoup(request.content, "html.parser")
+    print(soup.find("main").find("article").find("p").text)
 
 
 def __main__(options, args):
