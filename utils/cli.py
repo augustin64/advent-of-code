@@ -7,6 +7,7 @@ Suggéré: alias aoc="$CHEMIN_VERS_CE_REPO/utils/cli.py"
 from optparse import OptionParser
 from pathlib import Path
 import datetime
+import colors
 import os
 
 import requests
@@ -30,10 +31,23 @@ def download_input(year, day):
     print("ok")
 
 
-def show_puzzle(year, day, part=None):
+def show_puzzle(year, day, part=None, colored=False):
     """Affiche l'énoncé du jour demandé"""
     request = session.get(f"https://adventofcode.com/{year}/day/{int(day)}")
-    soup = BeautifulSoup(request.content, "html.parser")
+
+    content = request.content.decode("utf-8")
+    if colored:
+        content = content.replace("<h2", f"{colors.bold}<h2")
+        content = content.replace('<em class="star">', f'<em class="star">{colors.bold}{colors.yellow}')
+        content = content.replace('<em>', f'<em>{colors.bold}')
+        content = content.replace('<a href', f'{colors.green}<a href')
+        content = content.replace("</h2>", f"</h2>{colors.reset}\n")
+        content = content.replace("</em>", f"</em>{colors.reset}")
+        content = content.replace("</a>", f"</a>{colors.reset}")
+
+
+
+    soup = BeautifulSoup(content, "html.parser")
     day_desc = soup.find_all("article", {"class": "day-desc"})
     if part is None:
         for i in range(len(day_desc)):
@@ -67,7 +81,7 @@ def __main__(options, args):
             options.level = None
         else:
             options.level = int(options.level)
-        show_puzzle(options.year, options.day, options.level)
+        show_puzzle(options.year, options.day, options.level, colored=True)
     elif args[0] == "submit" or args[0] == "sb":
         if len(args) < 2:
             answer = input("Answer ?\n>> ")

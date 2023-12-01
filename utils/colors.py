@@ -1,0 +1,11 @@
+reset = "\033[0m"
+bold = "\033[1m"
+
+magenta = "\033[35m"
+yellow = "\033[33m"
+white = "\033[37m"
+green = "\033[32m"
+black = "\033[30m"
+cyan = "\033[36m"
+blue = "\033[34m"
+red = "\033[31m"
