@@ -23,29 +23,33 @@ def parse_sample(sample):
 
 
 def get_locations(data, new_seed=False):
-    if not new_seed:
-        pos = [(i, 1) for i in data[0][1]]
-    else:
+    if new_seed:
+        # Nouvelle définition des range
         pos = []
         for i in range(int(len(data[0][1])/2)):
             pos.append((data[0][1][2*i], data[0][1][2*i+1]))
         # print(pos)
+    else:
+        # On considère des range de 1
+        pos = [(i, 1) for i in data[0][1]]
 
     for converter in data[1:]:
+        # On itère sur tous les changements de type de données
         new_pos = []
         for (source, rg) in pos:
-            found = False
-            min_dst = rg
+            found = False # Il existe un converter ?
+            min_dst = rg # Distance min à un converter
             for possible_dest in converter[1]:
                 cv_dest, cv_source, cv_range = possible_dest 
 
                 if source >= cv_source and source <= cv_source+cv_range:
+                    # Un converter est disponible
                     treated_range = min(rg, cv_range - (source - cv_source))
-                    if treated_range > 0:
+                    if treated_range > 0: # Revoir la condition au dessus ? éviter de créer des élems 0 en tous cas
                         new_pos.append((source - (cv_source-cv_dest), treated_range))
 
                         #print(f"{converter[0]}: {source} -> {new_pos[-1]}")
-                        if (rg > treated_range):
+                        if (rg > treated_range): # Partie non convertie
                             #print(f"using tr:", (source+treated_range, rg - treated_range))
                             pos.append((source+treated_range, rg - treated_range))
                         found = True
@@ -55,6 +59,7 @@ def get_locations(data, new_seed=False):
                     min_dst = min(min_dst, cv_source-source)
 
             if not found:
+                # On ajoute jusqu'au prochain converter
                 new_pos.append((source, min_dst))
                 if min_dst < rg:
                     pos.append((source+min_dst, rg-min_dst))
