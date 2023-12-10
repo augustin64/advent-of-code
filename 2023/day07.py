@@ -3,11 +3,12 @@
 Jour 07 du défi Advent Of Code pour l'année 2023
 """
 from functools import cmp_to_key
-
+import os
 
 def read_sample():
     """récupère les entrées depuis le fichier texte correspondant"""
-    with open('inputs/day07.txt', 'r') as f:
+    filename = os.path.join(os.path.dirname(__file__ ), "inputs", "day07.txt")
+    with open(filename, 'r') as f:
         sample = f.read().split('\n')
     sample = [ (i.split(" ")[0], i.split(" ")[1]) for i in sample if i != '' ]
     return sample

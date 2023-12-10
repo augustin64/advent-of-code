@@ -2,10 +2,12 @@
 """
 Jour 09 du défi Advent Of Code pour l'année 2023
 """
+import os
 
 def read_sample():
     """récupère les entrées depuis le fichier texte correspondant"""
-    with open('inputs/day09.txt', 'r') as f:
+    filename = os.path.join(os.path.dirname(__file__ ), "inputs", "day09.txt")
+    with open(filename, 'r') as f:
         sample = f.read().split('\n')
     sample = [ [int(j) for j in i.split()] for i in sample if i != '' ]
     return sample

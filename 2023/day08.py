@@ -2,6 +2,15 @@
 """
 Jour 08 du défi Advent Of Code pour l'année 2023
 """
+import os
+
+def read_sample():
+    """récupère les entrées depuis le fichier texte correspondant"""
+    filename = os.path.join(os.path.dirname(__file__ ), "inputs", "day08.txt")
+    with open(filename, 'r') as f:
+        sample = f.read().split('\n')
+    sample = [ i for i in sample if i != '' ]
+    return sample
 
 def gcd(a, b):
     while b:
@@ -16,15 +25,6 @@ def lcm_of_list(numbers):
     for num in numbers:
         result = lcm(result, num)
     return result
-
-
-
-def read_sample():
-    """récupère les entrées depuis le fichier texte correspondant"""
-    with open('inputs/day08.txt', 'r') as f:
-        sample = f.read().split('\n')
-    sample = [ i for i in sample if i != '' ]
-    return sample
 
 def parse_sample(sample):
     instructions = sample[0]

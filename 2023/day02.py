@@ -2,6 +2,15 @@
 """
 Jour 02 du défi Advent Of Code pour l'année 2023
 """
+import os
+
+def read_sample():
+    """récupère les entrées depuis le fichier texte correspondant"""
+    filename = os.path.join(os.path.dirname(__file__ ), "inputs", "day02.txt")
+    with open(filename, 'r') as f:
+        sample = f.read().split('\n')
+    sample = [ i.split(": ")[1] for i in sample if i != '' ]
+    return sample
 
 class Tirage():
     def __init__(self, tirage):
@@ -21,14 +30,6 @@ class Tirage():
 
     def __repr__(self):
         return f"r{self.red}g{self.green}b{self.blue}"
-
-
-def read_sample():
-    """récupère les entrées depuis le fichier texte correspondant"""
-    with open('inputs/day02.txt', 'r') as f:
-        sample = f.read().split('\n')
-    sample = [ i.split(": ")[1] for i in sample if i != '' ]
-    return sample
 
 def parse_tirage(tirage):
     tirage.split(", ")
