@@ -3,7 +3,7 @@
 Jour 21 du défi Advent Of Code pour l'année 2023
 """
 import os
-from tqdm import tqdm
+from aoc_utils.decorators import timeit
 
 def read_sample():
     """récupère les entrées depuis le fichier texte correspondant"""
@@ -23,9 +23,10 @@ def do_steps(sample, steps=26501365, ext=False):
                 if sample[i][j] == 'S':
                     return (i, j)
 
-    def valid(pos):
+    def valid(pos, ext=False):
+        if ext:
+            return True
         return pos[0] >= 0 and pos[1] >= 0 and pos[0] < len_sample and pos[1] < len_sample0
-
 
     def is_point(pos, ext=False):
         if not ext and valid(pos):
@@ -39,43 +40,62 @@ def do_steps(sample, steps=26501365, ext=False):
     def voisins(pos, ext=False):
         i, j = pos
         v = []
-        if valid((i, j-1)) and is_point((i, j-1), ext=ext):
+        if valid((i, j-1), ext=ext) and is_point((i, j-1), ext=ext):
             v.append((i, j-1))
-        if valid((i-1, j)) and is_point((i-1, j), ext=ext):
+        if valid((i-1, j), ext=ext) and is_point((i-1, j), ext=ext):
             v.append((i-1, j))
-        if valid((i, j+1)) and is_point((i, j+1), ext=ext):
+        if valid((i, j+1), ext=ext) and is_point((i, j+1), ext=ext):
             v.append((i, j+1))
-        if valid((i+1, j)) and is_point((i+1, j), ext=ext):
+        if valid((i+1, j), ext=ext) and is_point((i+1, j), ext=ext):
             v.append((i+1, j))
         return v
 
     i, j = find_S()
-    pos_ts = {(i, j): [(0, 0)]}
-    for i in tqdm(range(steps)):
-        new_pos_ts = {}
-        for pos in pos_ts.keys():
+    pos_ts = {(i, j)}
+    for i in range(steps):
+        new_pos_ts = set()
+        for pos in pos_ts:
             for p in voisins(pos, ext=ext):
-                mp = (p[0]%len_sample, p[1]%len_sample0)
-                tile = (p[0]//len_sample, p[1]//len_sample0)
-                if mp not in new_pos_ts.keys():
-                    new_pos_ts[mp] = []
-                for elem in pos_ts[pos]:
-                    t = (tile[0]+elem[0], tile[1]+elem[1])
-                    if t not in new_pos_ts[mp]:
-                        new_pos_ts[mp].append(t)
+                new_pos_ts.add(p)
 
         pos_ts = new_pos_ts
     return pos_ts
 
 
+def lagrange_interpolation(points, x0):
+    result = 0
+    for i in range(len(points)):
+        temp = points[i][1]
+        for j in range(len(points)):
+            if j != i:
+                temp *= (x0 - points[j][0]) / (points[i][0] - points[j][0])
+
+        result += temp
+
+    return int(result)
+
+@timeit
 def part1(sample):
     """Partie 1 du défi"""
-    return sum([len(i) for i in do_steps(sample, steps=64, ext=False).values()])
+    return len(do_steps(sample, steps=64, ext=False))
 
+@timeit
 def part2(sample):
     """Partie 2 du défi"""
-    print("WARNING, this will take a lot of time (and could not even work)")
-    return sum([len(i) for i in do_steps(sample, ext=True).values()])
+    def challenge(steps):
+        return len(do_steps(sample, steps=steps, ext=True))
+
+
+    half_size = len(sample)//2
+    size = len(sample)
+    points = [
+        (half_size, challenge(half_size)),
+        (half_size+size, challenge(half_size+size)),
+        (half_size+2*size, challenge(half_size+2*size))
+    ]
+    return lagrange_interpolation(points, 26501365)
+
+
 
 
 def main():
