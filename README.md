@@ -7,7 +7,7 @@
 2020: ***~.....................
 2021: *******~~~...............
 2022: ***************~.*..*....
-2023: **********...............
+2023: **********************~..
 
 .: nothing
 ~: 1 star
@@ -20,9 +20,17 @@ Add this to your `.bashrc`:
 AOC_PATH=$HOME/path/to/this/repo/
 alias aoc="$AOC_PATH/utils/cli.py"
 aoc-new () {
+  # To create a new day
   cd $AOC_PATH
   PATH="$PATH:$AOC_PATH"
-  $AOC_PATH/new_day.sh
-  PS1="$PS1[aoc] "
+  $AOC_PATH/utils/new_day.sh
+  export PYTHONPATH="$PYTHONPATH:$AOC_PATH"
+}
+
+aoc-env () {
+  # To load the AoC environment
+  cd $AOC_PATH
+  PATH="$PATH:$AOC_PATH"
+  export PYTHONPATH="$PYTHONPATH:$AOC_PATH"
 }
 ```
