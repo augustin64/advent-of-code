@@ -5,15 +5,8 @@ Jour 23 du défi Advent Of Code pour l'année 2023
 import os
 import heapq
 
-# Un peu chaotique là
-dir_ections ={
-    '^': (-1, 0),
-    'v': (1, 0),
-    '<': (0, -1),
-    '>': (0, 1)
-}
+from aoc_utils import graph, constants, decorators
 
-directions = [(1, 0), (-1,0), (0, 1), (0, -1)]
 
 def read_sample():
     """récupère les entrées depuis le fichier texte correspondant"""
@@ -62,7 +55,7 @@ def added_elems(pos, npos):
 def find_next(sample, i, j):
     """Pourquoi en double ? je ne suis pas sûr duquel est exécuté donc je touche pas pour le moment"""
     symb = sample[i][j]
-    dirt = dir_ections[symb]
+    dirt = constants.arrows_dir[symb]
     i, j = i+dirt[0], j+dirt[1]
     i, j = i+dirt[0], j+dirt[1]
 
@@ -71,10 +64,10 @@ def find_next(sample, i, j):
 def compress_voisins(i, j, sample, symbols={'.'}):
     """Prochains voisins en sautant les longs tunnels"""
     def two_dirs(pi, pj):
-        return len([(a, b) for a, b in directions if valid((pi+a, pj+b), sample) and sample[pi+a][pj+b] in symbols]) <= 2
+        return len([(a, b) for a, b in constants.cardinal_dir if valid((pi+a, pj+b), sample) and sample[pi+a][pj+b] in symbols]) <= 2
 
     v = set()
-    for d in directions:
+    for d in constants.cardinal_dir:
         pi, pj = i+d[0], j+d[1]
         if valid((pi, pj), sample) and sample[pi][pj] in symbols:
             while valid((pi, pj), sample) and sample[pi][pj] in symbols and two_dirs(pi, pj):
@@ -88,7 +81,7 @@ def longest_hike(sample, start, end, part=1):
     def find_next(sample, i, j): # Globalement inutile, je n'avais pas compris la question comme ça initialement
         """Renvoie la position après avoir marché sur i, j"""
         symb = sample[i][j]
-        dirt = dir_ections[symb]
+        dirt = constants.arrows_dir[symb]
         i, j = i+dirt[0], j+dirt[1]
         while valid((i, j), sample) and sample[i][j] != '#':
             i, j = i+dirt[0], j+dirt[1]
@@ -130,7 +123,6 @@ def longest_hike(sample, start, end, part=1):
         for npos in pre_voisins[pos]:
             if npos == end:
                 to_end.append((dist+abs(npos[0]-pos[0])+abs(npos[1]-pos[1]), [])) #! Faster to return [] but will loose the "good" return path
-                print("new end:", dist+abs(npos[0]-pos[0])+abs(npos[1]-pos[1]))
                 current_max = max(current_max, dist+abs(npos[0]-pos[0])+abs(npos[1]-pos[1]))
 
             added = added_elems(pos, npos)
@@ -138,8 +130,6 @@ def longest_hike(sample, start, end, part=1):
             if not_intersect(added, prev) and valid(npos, sample):
                 heapq.heappush(priority_queue, (dist+abs(npos[0]-pos[0])+abs(npos[1]-pos[1]), (npos, prev+added)))
 
-
-    print([i[0] for i in to_end])
     return max(to_end)
 
 
@@ -154,19 +144,84 @@ def print_sol(solt, sample):
         print()
 
 
+def graph_longest_hike(g, start, end):
+    to_end = set()
+
+    priority_queue = [(0, (start, [start]))]
+    while priority_queue:
+        popped = heapq.heappop(priority_queue)
+        dist, data = popped
+        pos, prev = data
+
+        for voisin, local_dist in g[pos]:
+            if voisin == end:
+                if dist+local_dist not in to_end:
+                    print(f"\rMaximum actuel: {dist+local_dist}", end="")
+                    to_end.add(dist+local_dist)
+
+            if voisin not in prev:
+                heapq.heappush(priority_queue, (dist+local_dist, (voisin, prev+[voisin])))
+
+    print()
+    return max(to_end)
+
+def print_sol(solt, sample):
+    """Afficher une solution"""
+    for i in range(len(sample)):
+        for j in range(len(sample[0])):
+            if (i, j) in solt:
+                print('O', end='')
+            else:
+                print(sample[i][j], end='')
+        print()
+
+def create_graph(sample, symbols={'.'}):
+    def get_voisins(i, j):
+        potentials = [(i+a, j+b) for a, b in constants.cardinal_dir]
+        v = set()
+        for a, b in potentials:
+            if valid((a, b), sample) and sample[a][b] in symbols:
+                v.add(((a, b), 1))
+            elif valid((a, b), sample) and sample[a][b] in constants.arrows_dir.keys():
+                direction = constants.arrows_dir[sample[a][b]]
+                if valid((a+direction[0], b+direction[1]), sample) and sample[a+direction[0]][b+direction[1]] in symbols:
+                    v.add(((a+direction[0], b+direction[1]), 2))
+
+        return {(voisin, cout) for voisin, cout in v if voisin != (i, j)}
+
+    g = graph.Graph()
+    for i in range(len(sample)):
+        for j in range(len(sample[0])):
+            if sample[i][j] in symbols:
+                g.add_node((i, j))
+
+    for node in g:
+        for voisin, cost in get_voisins(*node):
+            g.add_edge(node, voisin, weight=cost)
+
+    return g
+
+@decorators.timeit
 def part1(sample):
     """Partie 1 du défi"""
+    # On ne peut pas utiliser la méthode du graphe car
+    # on compresse les graphes non orientés seulement
+
+    # Attention: ne donne pas le bon résultat sur les tests
     start, end = find_start(sample), find_end(sample)
     value, points = longest_hike(sample, start, end)
     return value
 
+@decorators.timeit
 def part2(sample):
     """Partie 2 du défi"""
-    # au bout de 1h20, 2378 seulement.
+    # au bout de 1h20, 2378 seulement avec l'ancienne méthode
+    # 4mn pour tout faire avec un graphe "compressé"
+    g = create_graph(sample, symbols={'.', '<', '>', '^', 'v'})
+    ratio = g.compress()
+
     start, end = find_start(sample), find_end(sample)
-    value, points = longest_hike(sample, start, end, part=2)
-    #print_sol(points, sample)
-    return value
+    return graph_longest_hike(g, start, end)
 
 
 def main():
