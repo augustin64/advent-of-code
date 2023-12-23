@@ -3,9 +3,8 @@
 Jour 16 du défi Advent Of Code pour l'année 2023
 """
 import os
-from functools import cache, wraps
 from tqdm import tqdm
-import time
+from aoc_utils.decorators import timeit
 
 def read_sample() -> list[str]:
     """récupère les entrées depuis le fichier texte correspondant"""
@@ -14,18 +13,6 @@ def read_sample() -> list[str]:
         sample = f.read().split('\n')
     sample = [ i for i in sample if i != '' ]
     return sample
-
-
-def timeit(func):
-    @wraps(func)
-    def timeit_wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        total_time = end_time - start_time
-        print(f'Function {func.__name__} Took {total_time:.4f} seconds')
-        return result
-    return timeit_wrapper
 
 
 def diff(l1: set, l2: set) -> bool:
