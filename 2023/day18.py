@@ -4,6 +4,8 @@ Jour 18 du défi Advent Of Code pour l'année 2023
 """
 import os
 
+from aoc_utils import snippets
+
 directions = {
     "R": (0, 1),
     "L": (0, -1),
@@ -107,29 +109,6 @@ def print_terrain(terrain):
         print()
 
 
-def border(data):
-    return(sum((i[1] for i in data)))
-
-# https://www.tutorialspoint.com/program-to-find-area-of-a-polygon-in-python
-def getInfo(x1, y1, x2, y2):
-    return x1*y2 - y1*x2
-
-def solve(data):
-    points = [t[0] for t in data]
-    N = len(points)
-    firstx, firsty = points[0]
-    prevx, prevy = firstx, firsty
-    res = 0
-
-    for i in range(1, N):
-        nextx, nexty = points[i]
-        res = res + getInfo(prevx,prevy,nextx,nexty)
-        prevx = nextx
-        prevy = nexty
-    res = res + getInfo(prevx,prevy,firstx,firsty)
-    return abs(res)/2.0
-
-
 def part1(sample):
     """Partie 1 du défi"""
     data = parse_sample(sample, new_method=False)
@@ -140,7 +119,8 @@ def part2(sample):
     """Partie 2 du défi"""
     data = parse_sample(sample, new_method=True)
     terrain = dig(data, only_edges=True)
-    return int(solve(terrain)+border(data)//2 +1)
+    points = [i[0] for i in terrain]
+    return snippets.area(points)
 
 
 def main():

@@ -3,8 +3,9 @@
 Jour 12 du défi Advent Of Code pour l'année 2023
 """
 import os
-from functools import cache, wraps
-from time import time
+from functools import cache
+
+from aoc_utils import decorators
 
 def read_sample():
     """récupère les entrées depuis le fichier texte correspondant"""
@@ -22,18 +23,6 @@ def parse_sample(sample):
         springs.append(sample[i].split(" ")[0])
         counts.append([int(i) for i in sample[i].split(" ")[1].split(",")])
     return springs, counts
-
-
-def timing(f):
-    @wraps(f)
-    def wrap(*args, **kw):
-        ts = time()
-        result = f(*args, **kw)
-        te = time()
-        print('> %s: %2.4f sec' % \
-          (f.__name__, te-ts))
-        return result
-    return wrap
 
 
 def nb_poss(spring, count):
@@ -114,7 +103,7 @@ def unfold(springs, counts):
         counts[i] = counts[i]*5
 
 
-@timing
+@decorators.timeit
 def part1(sample):
     """Partie 1 du défi"""
     springs, counts = parse_sample(sample)
@@ -125,7 +114,7 @@ def part1(sample):
     return sum(possibilities)
 
 
-@timing
+@decorators.timeit
 def part2(sample):
     """Partie 2 du défi"""
     springs, counts = parse_sample(sample)

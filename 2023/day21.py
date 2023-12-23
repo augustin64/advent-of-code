@@ -3,7 +3,8 @@
 Jour 21 du défi Advent Of Code pour l'année 2023
 """
 import os
-from aoc_utils.decorators import timeit
+
+from aoc_utils import decorators, snippets
 
 def read_sample():
     """récupère les entrées depuis le fichier texte correspondant"""
@@ -62,24 +63,12 @@ def do_steps(sample, steps=26501365, ext=False):
     return pos_ts
 
 
-def lagrange_interpolation(points, x0):
-    result = 0
-    for i in range(len(points)):
-        temp = points[i][1]
-        for j in range(len(points)):
-            if j != i:
-                temp *= (x0 - points[j][0]) / (points[i][0] - points[j][0])
-
-        result += temp
-
-    return int(result)
-
-@timeit
+@decorators.timeit
 def part1(sample):
     """Partie 1 du défi"""
     return len(do_steps(sample, steps=64, ext=False))
 
-@timeit
+@decorators.timeit
 def part2(sample):
     """Partie 2 du défi"""
     def challenge(steps):
@@ -93,7 +82,7 @@ def part2(sample):
         (half_size+size, challenge(half_size+size)),
         (half_size+2*size, challenge(half_size+2*size))
     ]
-    return lagrange_interpolation(points, 26501365)
+    return snippets.lagrange_interpolation(points, 26501365)
 
 
 
