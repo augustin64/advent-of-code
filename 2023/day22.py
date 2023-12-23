@@ -6,6 +6,8 @@ import os
 import string
 import random
 
+from aoc_utils.intervals import Interval
+
 def read_sample():
     """récupère les entrées depuis le fichier texte correspondant"""
     filename = os.path.join(os.path.dirname(__file__ ), "inputs", "day22.txt")
@@ -22,37 +24,25 @@ class Brick:
         coords = text.split("~")
         coords = (coords[0].split(','), coords[1].split(','))
 
-        self.x0 = int(coords[0][0])
-        self.y0 = int(coords[0][1])
-        self.z0 = int(coords[0][2])
-
-        self.x1 = int(coords[1][0])
-        self.y1 = int(coords[1][1])
-        self.z1 = int(coords[1][2])
+        self.x = Interval(int(coords[0][0]), int(coords[1][0]))
+        self.y = Interval(int(coords[0][1]), int(coords[1][1]))
+        self.z = Interval(int(coords[0][2]), int(coords[1][2]))
 
         self.label = random.choice(string.ascii_letters)
         self.text = text
 
     def __repr__(self):
-        return f"[{self.label}]{self.x0},{self.y0},{self.z0}~{self.x1},{self.y1},{self.z1}"
-        #return self.text+f"[{self.label}] [h:{self.z0}]"
+        return f"[{self.label}]{self.x.low},{self.y.low},{self.z.low}~{self.x.up},{self.y.up},{self.z.up}"
+        #return self.text+f"[{self.label}] [h:{self.z.low}]"
 
     def supported_by(self, brick):
-        def intersect(interval1, interval2):
-            if interval2[0] > interval1[1] or interval1[0] > interval2[1]:
-                return None
-            new_min = max(interval1[0], interval2[0])
-            new_max = min(interval1[1], interval2[1])
-            return [new_min, new_max]
-
-        if brick.z1 == self.z0-1:
-            if intersect([self.x0, self.x1], [brick.x0, brick.x1]) is not None \
-                and intersect([self.y0, self.y1], [brick.y0, brick.y1]) is not None:
+        if brick.z.up == self.z.low-1:
+            if self.x.intersect(brick.x) and self.y.intersect(brick.y):
                 return True
         return False
 
     def can_fall(self, bricks):
-        if self.z0 == 1:
+        if self.z.low == 1:
             return False
         for brick in bricks:
             if brick != self and self.supported_by(brick):
@@ -61,27 +51,20 @@ class Brick:
 
     def copy(self):
         # Assuming your class has a constructor that accepts the same parameters
-        copie = Brick(f"{self.x0},{self.y0},{self.z0}~{self.x1},{self.y1},{self.z1}")
+        copie = Brick(f"{self.x.low},{self.y.low},{self.z.low}~{self.x.up},{self.y.up},{self.z.up}")
         copie.label = self.label
         return copie
-
-def intersect(interval1, interval2):
-    if interval2[0] > interval1[1] or interval1[0] > interval2[1]:
-        return None
-    new_min = max(interval1[0], interval2[0])
-    new_max = min(interval1[1], interval2[1])
-    return [new_min, new_max]
 
 
 def print_pile(bricks):
     def occupied(x, z):
         for b in bricks:
-            if b.x0 <= x and x <= b.x1 and b.z0 <= z and z <= b.z1:
+            if b.x.low <= x and x <= b.x.up and b.z.low <= z and z <= b.z.up:
                 return b
         return False
 
-    for z in reversed(range(max((b.z1 for b in bricks))+1)):
-        for x in range(max((b.x1 for b in bricks))+1):
+    for z in reversed(range(max((b.z.up for b in bricks))+1)):
+        for x in range(max((b.x.up for b in bricks))+1):
             occ = occupied(x, z)
             if occ:
                 print(occ.label, end="")
@@ -93,7 +76,7 @@ def print_pile(bricks):
 def fall(bricks, count="z"):
     fallen = 0
     has_fallen = False
-    bricks.sort(key=lambda b: b.z1)
+    bricks.sort(key=lambda b: b.z.up)
     for brick in bricks:
         has_fallen = False
         while brick.can_fall(bricks):
@@ -101,8 +84,8 @@ def fall(bricks, count="z"):
                 fallen += 1
             
             has_fallen = True
-            brick.z0 -= 1
-            brick.z1 -= 1
+            brick.z.low -= 1
+            brick.z.up -= 1
         
         if count != "z" and has_fallen:
             fallen += 1
