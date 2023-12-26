@@ -5,6 +5,8 @@ Jour 24 du défi Advent Of Code pour l'année 2023
 import os
 import z3
 
+from aoc_utils import decorators
+
 def read_sample():
     """récupère les entrées depuis le fichier texte correspondant"""
     filename = os.path.join(os.path.dirname(__file__ ), "inputs", "day24.txt")
@@ -47,7 +49,7 @@ def intersection(h1, h2):
     return x, y
 
 
-
+@decorators.timeit
 def part1(sample, left=200000000000000, right=400000000000000):
     """Partie 1 du défi"""
     hailstones = [Hailstone(i) for i in sample]
@@ -63,12 +65,13 @@ def part1(sample, left=200000000000000, right=400000000000000):
 
     return count
 
+@decorators.timeit
 def part2(sample):
     """Partie 2 du défi"""
     hailstones = [Hailstone(i) for i in sample]
 
-    px, py, pz, dx, dy, dz = z3.Ints("px py pz dx dy dz")
-    collision = [z3.Int("t"+str(i)) for i in range(len(hailstones))]
+    px, py, pz, dx, dy, dz = z3.Reals("px py pz dx dy dz")
+    collision = [z3.Real("t"+str(i)) for i in range(len(hailstones))]
     solver = z3.Solver()
     for i in range(len(hailstones)):
         h = hailstones[i]
