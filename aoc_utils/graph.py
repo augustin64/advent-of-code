@@ -1,5 +1,8 @@
 from collections.abc import Mapping
 from typing import TypeVar, Optional, Iterator, Generic
+import networkx as nx
+import matplotlib.pyplot as plt
+
 
 T = TypeVar("T")
 
@@ -104,3 +107,35 @@ class Graph(Mapping, Generic[T]):
                     raise ValueError("Graph contains a negative cycle")
 
         return distances, predecessors
+
+    def networkx(self):
+        g = nx.Graph()
+        g.add_nodes_from(self)
+        for node in self:
+            for dest, _ in self[node]:
+                g.add_edge(node, dest)
+
+        return g
+
+    def dfs(self, node, views=None):
+        if views is None:
+            views = set()
+
+        views.add(node)
+        if node in self:
+            for v, _ in self[node]:
+                if v not in views:
+                    views = views | self.dfs(v, views=views)
+        return views
+
+    def connexes(self):
+        views = set()
+
+        ccs = []
+        for node in self:
+            if node not in views:
+                cur_views = self.dfs(node)
+                ccs.append(cur_views)
+                views = views | cur_views
+
+        return ccs
