@@ -3,4 +3,4 @@ z3-solver
 matplotlib
 networkx
 requests
-beautifulsoup
+beautifulsoup4
