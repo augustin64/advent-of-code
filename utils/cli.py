@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 
 home = str(Path.home())
 with open(os.path.join(home, ".aoc-cookie"), "r", encoding='utf8') as file:
-    cookie = file.read()
+    cookie = file.read().replace("\n", " ").strip()
 
 session = requests.Session()
 session.cookies["session"] = cookie
