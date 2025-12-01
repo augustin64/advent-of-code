@@ -10,12 +10,13 @@ DAY="$1"
 YEAR="$2"
 FILENAME="${YEAR}/day${DAY}.py"
 
+mkdir -p "${YEAR}/inputs"
 cp utils/template.py "$FILENAME"
 sed -i "s/DAY/${DAY}/" "$FILENAME"
 sed -i "s/YEAR/${YEAR}/" "$FILENAME"
 codium "$PWD" "$PWD/$FILENAME"
 
-if [[ $(date +%H) -lt 6 ]]; then
+if [[ 10#$(date +%H) -lt 6 ]]; then
 	SECONDS_UNTIL_START=$(( $(date -f - +%s- <<< "today 06:00"$'\nnow') 0 ))
 	echo "Waiting ${SECONDS_UNTIL_START} seconds.."
 	sleep $SECONDS_UNTIL_START;
