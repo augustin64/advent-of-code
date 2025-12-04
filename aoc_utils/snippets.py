@@ -46,3 +46,19 @@ def area(points: list[tuple[Nb, Nb]], count_border: bool=True) -> int:
         return int(inner_area()+border()//2 +1)
 
     return int(inner_area())
+
+
+def get8_adj(x, y, max_x, max_y):
+    """
+    Get 8 adjacent positions of a point in a grid
+    """
+    pos = [
+        (x-1, y-1), (x-1, y), (x-1, y+1),
+        (x, y-1),             (x, y+1),
+        (x+1, y-1), (x+1, y), (x+1, y+1),
+    ]
+    return [
+        (i, j) for (i, j) in pos
+        if i >= 0 and j >= 0 and
+        i < max_x and j < max_y
+    ]
